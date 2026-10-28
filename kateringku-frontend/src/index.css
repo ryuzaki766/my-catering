@@ -1,0 +1,242 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.625rem;
+  }
+}
+
+:root {
+  --cream: #fcf8ef;
+  --cream-deep: #f5eddc;
+  --ink: #2b2118;
+  --ink-soft: #6f6154;
+  --terra: #d5593f;
+  --terra-deep: #b8452e;
+  --mustard: #dfa43d;
+  --leaf: #16ac7a;
+  --cobalt: #316ad3;
+}
+
+html,
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Figtree', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: 'Plus Jakarta Sans', 'Figtree', sans-serif;
+}
+
+/* ---------- entrance ---------- */
+@keyframes upShow {
+  0% {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  60% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.up-show {
+  opacity: 0;
+  animation: upShow 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.pop-in {
+  animation: popIn 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.fade-in {
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* ---------- bar growth ---------- */
+@keyframes growBar {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+.grow-bar {
+  transform-origin: bottom;
+  animation: growBar 0.9s cubic-bezier(0.165, 0.84, 0.44, 1) backwards;
+}
+
+@keyframes growBarX {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.grow-bar-x {
+  transform-origin: left;
+  animation: growBarX 0.9s cubic-bezier(0.165, 0.84, 0.44, 1) backwards;
+}
+
+/* ---------- steam / float decorations ---------- */
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--rot, 0deg));
+  }
+  50% {
+    transform: translateY(-9px) rotate(var(--rot, 0deg));
+  }
+}
+.floaty {
+  animation: floaty 5s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(22, 172, 122, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba(22, 172, 122, 0);
+  }
+}
+.pulse-dot {
+  animation: pulseDot 1.8s ease-in-out infinite;
+}
+
+/* ---------- buttons ---------- */
+.btn-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  overflow: hidden;
+}
+.btn-arrow .arr {
+  transition: transform 0.25s ease-in-out;
+}
+.btn-arrow:hover .arr {
+  transform: translateX(5px);
+}
+
+.lift {
+  transition:
+    transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+.lift:hover {
+  transform: translateY(-3px);
+}
+
+/* status change ripple */
+@keyframes statusPop {
+  0% {
+    transform: scale(0.7);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.status-pop {
+  animation: statusPop 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* toast */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.toast-in {
+  animation: toastIn 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* print: hanya area belanja */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-area,
+  #print-area * {
+    visibility: visible;
+  }
+  #print-area {
+    position: absolute;
+    inset: 0;
+    padding: 24px;
+    background: white;
+  }
+}
+
+/* scrollbar halus */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #e3d5ba;
+  border-radius: 8px;
+  border: 2px solid var(--cream);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+input[type='number']::-webkit-inner-spin-button {
+  opacity: 1;
+}

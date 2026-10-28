@@ -1,0 +1,169 @@
+// Prisma schema untuk KateringKu Backend
+// Sumber referensi: supabase/migrations/20261005000001_skema.sql
+// Catatan: foreign key memakai kolom `id` tunggal (idiom Prisma), sedangkan
+// penjagaan multi-tenancy (usaha_id) tetap dilakukan di level aplikasi pada repository.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SatuanDasar {
+  g
+  ml
+  butir
+
+  @@map("satuan_dasar")
+}
+
+enum StatusPesanan {
+  baru
+  diproses
+  terkirim
+  lunas
+  batal
+
+  @@map("status_pesanan")
+}
+
+enum PeranAnggota {
+  pemilik
+  staf
+
+  @@map("peran_anggota")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  dibuatPada   DateTime @default(now()) @map("dibuat_pada")
+
+  anggota Anggota?
+
+  @@map("users")
+}
+
+model Usaha {
+  id         String   @id @default(uuid()) @db.Uuid
+  nama       String
+  dibuatPada DateTime @default(now()) @map("dibuat_pada")
+
+  anggota     Anggota[]
+  bahan       Bahan[]
+  menu        Menu[]
+  resep       Resep[]
+  pelanggan   Pelanggan[]
+  pesanan     Pesanan[]
+  itemPesanan ItemPesanan[]
+
+  @@map("usaha")
+}
+
+model Anggota {
+  userId  String       @id @map("user_id") @db.Uuid
+  usahaId String       @map("usaha_id") @db.Uuid
+  peran   PeranAnggota @default(pemilik)
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usaha Usaha @relation(fields: [usahaId], references: [id], onDelete: Cascade)
+
+  @@map("anggota")
+}
+
+model Bahan {
+  id             String  @id @default(uuid()) @db.Uuid
+  usahaId        String  @map("usaha_id") @db.Uuid
+  nama           String
+  satuan         SatuanDasar
+  hargaPerSatuan Decimal @map("harga_per_satuan") @db.Decimal(14, 4)
+
+  usaha Usaha  @relation(fields: [usahaId], references: [id], onDelete: Cascade)
+  resep Resep[]
+
+  @@unique([usahaId, nama])
+  @@map("bahan")
+}
+
+model Menu {
+  id        String  @id @default(uuid()) @db.Uuid
+  usahaId   String  @map("usaha_id") @db.Uuid
+  nama      String
+  hargaJual Decimal @map("harga_jual") @db.Decimal(12, 0)
+  aktif     Boolean @default(true)
+
+  usaha       Usaha         @relation(fields: [usahaId], references: [id], onDelete: Cascade)
+  resep       Resep[]
+  itemPesanan ItemPesanan[]
+
+  @@unique([usahaId, nama])
+  @@map("menu")
+}
+
+model Resep {
+  id       String  @id @default(uuid()) @db.Uuid
+  usahaId  String  @map("usaha_id") @db.Uuid
+  menuId   String  @map("menu_id") @db.Uuid
+  bahanId  String  @map("bahan_id") @db.Uuid
+  takaran  Decimal @db.Decimal(10, 2)
+
+  usaha Usaha @relation(fields: [usahaId], references: [id], onDelete: Cascade)
+  menu  Menu  @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  bahan Bahan @relation(fields: [bahanId], references: [id], onDelete: Restrict)
+
+  @@unique([menuId, bahanId])
+  @@map("resep")
+}
+
+model Pelanggan {
+  id      String  @id @default(uuid()) @db.Uuid
+  usahaId String  @map("usaha_id") @db.Uuid
+  nama    String
+  kontak  String?
+
+  usaha   Usaha     @relation(fields: [usahaId], references: [id], onDelete: Cascade)
+  pesanan Pesanan[]
+
+  @@map("pelanggan")
+}
+
+model Pesanan {
+  id            String        @id @default(uuid()) @db.Uuid
+  usahaId       String        @map("usaha_id") @db.Uuid
+  pelangganId   String?       @map("pelanggan_id") @db.Uuid
+  namaPelanggan String        @map("nama_pelanggan")
+  tanggalKirim  DateTime      @map("tanggal_kirim") @db.Date
+  status        StatusPesanan @default(baru)
+  dp            Decimal       @db.Decimal(12, 0)
+  catatan       String?
+  dibuatPada    DateTime      @default(now()) @map("dibuat_pada")
+
+  usaha     Usaha          @relation(fields: [usahaId], references: [id], onDelete: Cascade)
+  pelanggan Pelanggan?     @relation(fields: [pelangganId], references: [id], onDelete: SetNull)
+  items     ItemPesanan[]
+
+  @@index([usahaId, tanggalKirim])
+  @@map("pesanan")
+}
+
+model ItemPesanan {
+  id                String  @id @default(uuid()) @db.Uuid
+  usahaId           String  @map("usaha_id") @db.Uuid
+  pesananId         String  @map("pesanan_id") @db.Uuid
+  menuId            String  @map("menu_id") @db.Uuid
+  jumlah            Int
+  hargaJualSnapshot Decimal @map("harga_jual_snapshot") @db.Decimal(12, 0)
+  hppSnapshot       Decimal @map("hpp_snapshot") @db.Decimal(12, 2)
+
+  usaha   Usaha   @relation(fields: [usahaId], references: [id], onDelete: Cascade)
+  pesanan Pesanan @relation(fields: [pesananId], references: [id], onDelete: Cascade)
+  menu    Menu    @relation(fields: [menuId], references: [id], onDelete: Restrict)
+
+  @@index([pesananId])
+  @@index([menuId])
+  @@map("item_pesanan")
+}

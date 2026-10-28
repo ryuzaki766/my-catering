@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const pesananController_js_1 = require("../controllers/pesananController.js");
+const auth_js_1 = require("../middlewares/auth.js");
+const validate_js_1 = require("../middlewares/validate.js");
+const validasi_js_1 = require("../utils/validasi.js");
+const router = (0, express_1.Router)();
+router.use(auth_js_1.authMiddleware);
+router.use(auth_js_1.requireUsahaMiddleware);
+router.get('/', pesananController_js_1.PesananController.getAll);
+router.get('/:id', pesananController_js_1.PesananController.getById);
+router.post('/', (0, validate_js_1.validateBody)(validasi_js_1.buatPesananSchema), pesananController_js_1.PesananController.create);
+router.put('/:id', (0, validate_js_1.validateBody)(validasi_js_1.ubahPesananSchema), pesananController_js_1.PesananController.update);
+router.patch('/:id/status', (0, validate_js_1.validateBody)(validasi_js_1.ubahStatusPesananSchema), pesananController_js_1.PesananController.updateStatus);
+router.post('/:id/advance-status', pesananController_js_1.PesananController.advanceStatus);
+router.post('/:id/batal', pesananController_js_1.PesananController.cancel);
+router.delete('/:id', pesananController_js_1.PesananController.delete);
+exports.default = router;
+//# sourceMappingURL=pesananRoutes.js.map

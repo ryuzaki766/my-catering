@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: kateringku-api
+    restart: unless-stopped
+    ports:
+      - '3001:3001'
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - DB_MODE=postgres
+      - DATABASE_URL=postgresql://kateringku:kateringku123@postgres:5432/kateringku_db?sslmode=disable
+      - JWT_SECRET=super-secret-kateringku-jwt-key-min-32-chars-length
+      - JWT_EXPIRES_IN=7d
+      - CORS_ORIGIN=*
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: kateringku-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=kateringku
+      - POSTGRES_PASSWORD=kateringku123
+      - POSTGRES_DB=kateringku_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Skema database sekarang dikelola oleh Prisma, bukan SQL migrasi Supabase.
+      # Jalankan `npm run db:push` sekali (dengan DATABASE_URL lokal) untuk membuat tabel.
+
+volumes:
+  pgdata:
